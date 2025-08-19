@@ -101,8 +101,10 @@ else {
     Write-Warning "[[Scheduler]] Backup task not scheduled: there is already a task with the name '$backup_task_name'."
 }
 
-# Install NuGet and Send-MailKitMessage module (by force)
-if ($PSVersionTable.PSVersion.Major -eq 5) {
-    Install-PackageProvider -Name NuGet -Force
+if(($SendEmailOnSuccess -eq $true) -or ($SendEmailOnError -eq $true)) {
+	# Install NuGet and Send-MailKitMessage module (by force)
+	if ($PSVersionTable.PSVersion.Major -eq 5) {
+		Install-PackageProvider -Name NuGet -Force
+	}
+	Install-Module Send-MailKitMessage -Repository PSGallery -Scope AllUsers -Force
 }
-Install-Module Send-MailKitMessage -Repository PSGallery -Scope AllUsers -Force

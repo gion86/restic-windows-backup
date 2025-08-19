@@ -325,6 +325,10 @@ function Invoke-Backup {
 function Send-Email {
     Param($SuccessLog, $ErrorLog, $Action)
 
+	if(($SendEmailOnSuccess -eq $false) -and ($SendEmailOnError -eq $false)) {
+		return
+	}
+
     Import-Module Send-MailKitMessage
 
     # default the action string to "Backup"
