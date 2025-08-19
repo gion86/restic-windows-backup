@@ -216,7 +216,7 @@ function Invoke-Maintenance {
 
 # Run restic backup
 function Invoke-Backup {
-    Param($SuccessLog, $ErrorLog)
+    Param($SuccessLog, $ErrorLog, $arguments)
 
     "[[Backup]] Start $(Get-Date)" | Tee-Object -Append $SuccessLog | Write-Host
     $return_value = $true
@@ -306,7 +306,9 @@ function Invoke-Backup {
         }
         else {
             # Launch Restic
-            Invoke-Expression "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters 3>&1 2>> $ErrorLog | Out-File -Append $SuccessLog"
+			Write-Host "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters $arguments"
+
+            Invoke-Expression "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters $arguments 3>&1 2>> $ErrorLog | Out-File -Append $SuccessLog"
             if($LASTEXITCODE) {
                 "[[Backup]] Completed with errors" | Tee-Object -Append $ErrorLog | Tee-Object -Append $SuccessLog | Write-Host
                 $return_value = $false
@@ -530,6 +532,11 @@ function Invoke-HistoryCheck {
 # main function
 function Invoke-Main {
 
+	param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$arguments
+    )
+
     # check for elevation, required for creation of shadow copy (VSS)
     if (-not (New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
     {
@@ -579,7 +586,7 @@ function Invoke-Main {
         $repository_available = Invoke-ConnectivityCheck $success_log $error_log
         if($repository_available -eq $true) {
             Invoke-Unlock $success_log $error_log
-            $backup_success = Invoke-Backup $success_log $error_log
+            $backup_success = Invoke-Backup $success_log $error_log $arguments
 
             # NOTE: a previously locked repository will cause errors in the log; but backup would be 'successful'
             # Removing this overly-aggressive test for backup success and relying upon Invoke-Backup to report on success/failure
@@ -712,4 +719,4 @@ function Invoke-Main {
     exit $error_count
 }
 
-Invoke-Main
+Invoke-Main $args
