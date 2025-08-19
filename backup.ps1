@@ -561,9 +561,7 @@ function Invoke-Main {
     Get-BackupState
 
     if(!(Test-Path $Script:LogPath)) {
-        Write-Error "[[Backup]] Log file directory $Script:LogPath does not exist. Exiting."
-        Send-Email
-        exit 1
+		New-Item -Path "$script:LogPath" -ItemType Directory
     }
 
     # custom start action
