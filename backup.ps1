@@ -308,7 +308,7 @@ function Invoke-Backup {
             # Launch Restic
 			Write-Host "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters $arguments"
 
-            Invoke-Expression "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters $arguments 3>&1 2>> $ErrorLog | Out-File -Append $SuccessLog"
+            Invoke-Expression "$Script:ResticExe backup $folder_list $vss_option --tag $tag --exclude-file=$WindowsExcludeFile --exclude-file=$LocalExcludeFile $AdditionalBackupParameters $arguments 3>&1 2>> $ErrorLog | Tee-Object -Append $SuccessLog | Write-Host"
             if($LASTEXITCODE) {
                 "[[Backup]] Completed with errors" | Tee-Object -Append $ErrorLog | Tee-Object -Append $SuccessLog | Write-Host
                 $return_value = $false
